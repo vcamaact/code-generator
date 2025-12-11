@@ -20,10 +20,10 @@ export default function RegisterForm() {
 
   return (
     <div className="p-8 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">User Registration</h1>
+      <h1 className="text-2xl font-bold mb-4 text-center">User Registration</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block mb-1">Username</label>
+        <div className="flex flex-col items-center">
+          <label className="block mb-1 w-full text-left">Username</label>
           <input
             type="text"
             name="username"
@@ -32,8 +32,8 @@ export default function RegisterForm() {
             className="w-full p-2 border rounded"
           />
         </div>
-        <div>
-          <label className="block mb-1">Email</label>
+        <div className="flex flex-col items-center">
+          <label className="block mb-1 w-full text-left">Email</label>
           <input
             type="email"
             name="email"
@@ -42,8 +42,8 @@ export default function RegisterForm() {
             className="w-full p-2 border rounded"
           />
         </div>
-        <div>
-          <label className="block mb-1">Password</label>
+        <div className="flex flex-col items-center">
+          <label className="block mb-1 w-full text-left">Password</label>
           <input
             type="password"
             name="password"
@@ -52,9 +52,11 @@ export default function RegisterForm() {
             className="w-full p-2 border rounded"
           />
         </div>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-          Register
-        </button>
+        <div className="flex justify-center">
+          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+            Register
+          </button>
+        </div>
       </form>
     </div>
   )
