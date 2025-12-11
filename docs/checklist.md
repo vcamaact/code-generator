@@ -20,22 +20,22 @@ This plan outlines the steps to build the Proof of Concept (POC) for the Code Ge
 ## Phase 2: LangChain Agent Implementation
 
 ### Code Generator Agent
-- [ ] **Define Input/Output**: User prompt -> Modified React Code
-- [ ] **Implement Tools**:
+- [x] **Define Input/Output**: User prompt -> Modified React Code
+- [x] **Implement Tools**:
     - File Reader (read existing component)
     - Code Analyzer (understand structure)
     - Code Generator (apply changes)
 
 ### Git Operations Agent
-- [ ] **Define Input/Output**: Generated Code -> Branch/Commit
-- [ ] **Implement Tools**:
+- [x] **Define Input/Output**: Generated Code -> Branch/Commit
+- [x] **Implement Tools**:
     - Branch Creator
     - File Writer
     - Git Committer
 
 ### Code Executor Agent
-- [ ] **Define Input/Output**: Path -> Build Results
-- [ ] **Implement Tools**:
+- [x] **Define Input/Output**: Path -> Build Results
+- [x] **Implement Tools**:
     - Dependency Installer
     - Build Runner
     - Test Runner
