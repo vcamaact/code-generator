@@ -113,7 +113,7 @@ export default function Home() {
           <div className="form-actions">
             <button
               type="button"
-              onClick={() => setFormData({ title: '', prompt: '' })}
+              onClick={() => setFormData({ title: '', prompt: '', targetFile: '' })}
               className="btn btn-secondary"
               disabled={isSubmitting}
             >
