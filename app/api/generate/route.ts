@@ -1,3 +1,4 @@
+import { Orchestrator } from '@/app/lib/langchain/orchestrator';
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
@@ -12,18 +13,25 @@ export async function POST(req: Request) {
       );
     }
 
-    // TODO: Initialize Orchestrator and run workflow
-    // const result = await orchestrator.run({ prompt, title });
+    const orchestrator = new Orchestrator();
+    const result = await orchestrator.run({ prompt, title });
 
-    return NextResponse.json({ 
-      message: 'Request received', 
-      data: { prompt, title },
-      status: 'processing'
+    if (result.error) {
+      return NextResponse.json(
+        { error: result.error },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      message: 'Processing complete',
+      data: result,
+      status: 'success'
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error processing request:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: error.message || 'Internal server error' },
       { status: 500 }
     );
   }

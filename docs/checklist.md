@@ -42,9 +42,9 @@ This plan outlines the steps to build the Proof of Concept (POC) for the Code Ge
 
 ## Phase 3: Orchestrator (LangGraph)
 
-- [ ] **Define Workflow State**
+- [x] **Define Workflow State**
     - Prompt, Feature Title, Parsed Request, Code, Git Info, Results
-- [ ] **Implement Workflow Steps**
+- [x] **Implement Workflow Steps/Nodes**
     - `ParsePrompt`
     - `ReadCurrentCode`
     - `GenerateCode`
