@@ -5,7 +5,8 @@ import { useState } from 'react'
 export default function Home() {
   const [formData, setFormData] = useState({
     title: '',
-    prompt: ''
+    prompt: '',
+    targetFile: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -20,15 +21,31 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-    
-    // Processing logic will be implemented here
-    console.log('Form data:', formData)
-    
-    // Simulate a delay
-    setTimeout(() => {
+
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Something went wrong')
+      }
+
+      console.log('Success:', data)
+      alert(`Success! Branch created: ${data.data.branchName}`)
+
+    } catch (error: any) {
+      console.error('Error:', error)
+      alert(`Error: ${error.message}`)
+    } finally {
       setIsSubmitting(false)
-      alert('Form submitted. Data will be processed shortly.')
-    }, 1000)
+    }
   }
 
   return (
@@ -45,8 +62,8 @@ export default function Home() {
           <div className="form-group">
             <label htmlFor="title">
               Feature Title <span className="optional">(optional)</span>
-            <br/>
-            <span className="text-sm text-gray-500">Enter a descriptive title for your feature</span>
+              <br />
+              <span className="text-sm text-gray-500">Enter a descriptive title for your feature</span>
             </label>
             <input
               type="text"
@@ -55,6 +72,21 @@ export default function Home() {
               value={formData.title}
               onChange={handleChange}
               placeholder="E.g: Add user authentication"
+              className="input"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="targetFile">
+              Target File <span className="optional">(optional, default: app/page.tsx)</span>
+            </label>
+            <input
+              type="text"
+              id="targetFile"
+              name="targetFile"
+              value={formData.targetFile}
+              onChange={handleChange}
+              placeholder="E.g: app/test-form/page.tsx"
               className="input"
             />
           </div>

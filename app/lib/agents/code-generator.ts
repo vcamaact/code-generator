@@ -6,7 +6,7 @@ export class CodeGeneratorAgent {
 
   constructor() {
     this.model = new ChatOpenAI({
-      modelName: "gpt-4o", // or "gpt-4-turbo"
+      modelName: process.env.OPENAI_MODEL || "gpt-4o",
       temperature: 0,
     });
   }

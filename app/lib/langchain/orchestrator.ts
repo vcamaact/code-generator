@@ -133,11 +133,11 @@ export class Orchestrator {
     this.workflow = workflow.compile();
   }
 
-  async run(input: { prompt: string; title?: string }) {
+  async run(input: { prompt: string; title?: string; targetFile?: string }) {
     const result = await this.workflow.invoke({
       prompt: input.prompt,
       title: input.title,
-      targetFile: "app/page.tsx" // Hardcoded for POC
+      targetFile: input.targetFile || "app/page.tsx"
     });
     return result;
   }

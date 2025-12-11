@@ -1,8 +1,8 @@
-# Implementation Plan - Code Generator POC
+# Phase 1 Implementation Plan - Code Generator POC
 
 This plan outlines the steps to build the Proof of Concept (POC) for the Code Generator, which allows users to modify the Darwin project UI via text prompts.
 
-## Phase 1: Setup and Infrastructure
+## Step 1: Setup and Infrastructure
 
 - [x] **Install Dependencies**
     - `langchain`, `@langchain/openai`, `@langchain/community`
@@ -17,7 +17,7 @@ This plan outlines the steps to build the Proof of Concept (POC) for the Code Ge
     - Create API route: `app/api/generate/route.ts`
     - Create lib directories: `app/lib/agents`, `app/lib/langchain`
 
-## Phase 2: LangChain Agent Implementation
+## Step 2: LangChain Agent Implementation
 
 ### Code Generator Agent
 - [x] **Define Input/Output**: User prompt -> Modified React Code
@@ -40,7 +40,7 @@ This plan outlines the steps to build the Proof of Concept (POC) for the Code Ge
     - Build Runner
     - Test Runner
 
-## Phase 3: Orchestrator (LangGraph)
+## Step 3: Orchestrator (LangGraph)
 
 - [x] **Define Workflow State**
     - Prompt, Feature Title, Parsed Request, Code, Git Info, Results
@@ -56,7 +56,7 @@ This plan outlines the steps to build the Proof of Concept (POC) for the Code Ge
     - `RunTests`
     - `GenerateSummary`
 
-## Phase 4: Verification & Testing
+## Step 4: Verification & Testing
 
 - [x] **Test Case: Add Phone Field**
     - [x] Verify prompt parsing
@@ -64,3 +64,23 @@ This plan outlines the steps to build the Proof of Concept (POC) for the Code Ge
     - [x] Verify code generation (valid React code)
     - [x] Verify git branch creation and commit
     - [x] Verify build success
+
+## Phase 2 (Integration): Integration & Self-Modification Testing
+
+- [x] Step 1: **UI Integration**
+    - Update `handleSubmit` in `app/page.tsx` to call `/api/generate`
+    - Handle API response (success/error states)
+    - Add loading indicator during generation
+
+- [x] Step 2: **API & Orchestrator Updates**
+    - Instantiate `Orchestrator` in `app/api/generate/route.ts`
+    - Configure `CodeGeneratorAgent` to use real OpenAI API
+    - Ensure `Orchestrator` targets current project directory
+
+- [ ] Step 3: **Self-Modification Test**
+    - Run scenario: "Add helper text to Feature Title"
+    - Verify UI sends correct prompt
+    - Verify API triggers Orchestrator
+    - Verify file modification (`app/page.tsx`)
+    - Verify Git branch creation
+    - Verify Build success

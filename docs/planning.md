@@ -278,6 +278,39 @@ interface WorkflowState {
 
 ---
 
+## Phase 2: Integration & Self-Modification Testing
+
+### Objective
+
+Implement the logic to send the prompt entered in the `app/page.tsx` form to the `app/api/generate/route.ts` endpoint. The endpoint must execute the Orchestrator, which should use OpenAI (real implementation) to generate the code.
+
+### Scope
+
+For initial testing purposes, the system will **modify its own codebase** (the CodeGenerator project itself) instead of an external Darwin repository.
+
+### Implementation Steps
+
+1.  **UI Integration (`app/page.tsx`)**
+    - Update the `handleSubmit` function to make a POST request to `/api/generate`.
+    - Handle loading states and display success/error messages based on the API response.
+
+2.  **API & Orchestrator Update**
+    - Ensure `app/api/generate/route.ts` correctly instantiates and runs the `Orchestrator`.
+    - Update `CodeGeneratorAgent` to use the real OpenAI API (remove mocks if any).
+    - Ensure `Orchestrator` targets the current project directory for file modifications.
+
+3.  **Testing Scenario**
+    - **Prompt**: "Add a helper text below the Feature Title label" (or similar).
+    - **Expected Outcome**:
+        - The UI sends the prompt.
+        - The API triggers the agent.
+        - The agent modifies `app/page.tsx` (or another target file).
+        - A new branch is created with the changes.
+        - The build verifies the changes.
+
+
+---
+
 ## Questions to Resolve
 
 1. Do we have access to the Darwin repository? (Local clone or remote access)

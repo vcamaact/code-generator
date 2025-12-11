@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { prompt, title } = body;
+    const { prompt, title, targetFile } = body;
 
     if (!prompt) {
       return NextResponse.json(
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     }
 
     const orchestrator = new Orchestrator();
-    const result = await orchestrator.run({ prompt, title });
+    const result = await orchestrator.run({ prompt, title, targetFile });
 
     if (result.error) {
       return NextResponse.json(
