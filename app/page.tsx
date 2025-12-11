@@ -45,6 +45,8 @@ export default function Home() {
           <div className="form-group">
             <label htmlFor="title">
               Feature Title <span className="optional">(optional)</span>
+            <br/>
+            <span className="text-sm text-gray-500">Enter a descriptive title for your feature</span>
             </label>
             <input
               type="text"
