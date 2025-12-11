@@ -4,16 +4,16 @@ This plan outlines the steps to build the Proof of Concept (POC) for the Code Ge
 
 ## Phase 1: Setup and Infrastructure
 
-- [ ] **Install Dependencies**
+- [x] **Install Dependencies**
     - `langchain`, `@langchain/openai`, `@langchain/community`
     - `@langchain/langgraph`
     - `simple-git`
     - `@types/node`
-- [ ] **Configure Environment**
+- [x] **Configure Environment**
     - Set up `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`
     - Set up `GITHUB_TOKEN`
     - Define `DARWIN_REPO_PATH`
-- [ ] **Project Structure**
+- [x] **Project Structure**
     - Create API route: `app/api/generate/route.ts`
     - Create lib directories: `app/lib/agents`, `app/lib/langchain`
 
