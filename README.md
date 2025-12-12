@@ -1,36 +1,147 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Code Generator AI con CODEX
 
-## Getting Started
+Generador de código inteligente que utiliza GPT-4 para modificar archivos automáticamente, creando ramas Git, commiteando y pusheando cambios.
 
-First, run the development server:
+## Características
+
+- 🤖 **Modificación automática de código** usando GPT-4
+- 🔀 **Gestión automática de Git**: crea ramas, commits y push
+- 🎨 **Interfaz moderna** con efectos glassmorphism
+- 📝 **Análisis inteligente** de prompts para identificar archivos a modificar
+- ✅ **Validación de código** antes de aplicar cambios
+
+## Requisitos Previos
+
+- Node.js 18+ 
+- Git configurado
+- Cuenta de OpenAI con API key
+- GitHub Personal Access Token (para auto-push)
+
+## Configuración
+
+### 1. Instalar dependencias
+
+```bash
+npm install
+```
+
+### 2. Configurar variables de entorno
+
+Crea un archivo `.env.local` en la raíz del proyecto:
+
+```env
+OPENAI_API_KEY=tu_api_key_de_openai
+GITHUB_TOKEN=tu_github_personal_access_token
+GIT_DEFAULT_BRANCH=main
+```
+
+### 3. Configurar Git Remote
+
+```bash
+git remote add origin https://github.com/tu-usuario/tu-repositorio.git
+```
+
+### 4. Ejecutar en desarrollo
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Uso
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Code Modifier
 
-## Learn More
+1. Navega a `/code-modifier`
+2. Describe los cambios que necesitas en el prompt
+3. Configura las opciones:
+   - **Auto-commit**: Commitea automáticamente los cambios
+   - **Auto-push**: Pushea los cambios al repositorio remoto
+4. Haz clic en "Modificar Código"
 
-To learn more about Next.js, take a look at the following resources:
+El sistema:
+- Analizará tu prompt con GPT-4
+- Identificará qué archivos modificar
+- Creará una nueva rama (formato: `codex-{timestamp}-{descripción}`)
+- Aplicará los cambios solicitados
+- Commiteará los cambios (si está habilitado)
+- Pusheará al remoto (si está habilitado)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Ejemplos de Prompts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+"Agrega un componente Button en src/components con variantes primary y secondary"
 
-## Deploy on Vercel
+"Modifica el archivo page.tsx para agregar un título con el texto 'Bienvenido'"
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+"Crea un nuevo archivo utils.ts en src/lib con una función para formatear fechas"
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+"Agrega validación de email al formulario en src/app/login/page.tsx"
+```
+
+## Arquitectura
+
+### Backend
+
+- **GitService** (`src/lib/GitService.ts`): Maneja operaciones Git
+  - Crear ramas
+  - Leer/escribir archivos
+  - Commits
+  - Push con autenticación
+
+- **CodexService** (`src/lib/CodexService.ts`): Integración con OpenAI
+  - Análisis de prompts
+  - Generación de código
+  - Validación de sintaxis
+  - Generación de mensajes de commit
+
+- **API Route** (`src/app/api/code-modify/route.ts`): Endpoint principal
+  - Orquesta el flujo completo
+  - Maneja errores
+  - Retorna resultados
+
+### Frontend
+
+- **Code Modifier Page** (`src/app/code-modifier/page.tsx`): Interfaz principal
+  - Formulario de prompts
+  - Configuración de opciones Git
+  - Visualización de resultados
+
+## Seguridad
+
+- ⚠️ **IMPORTANTE**: Nunca commitees tu archivo `.env.local`
+- El GitHub Token debe tener permisos de `repo` para push
+- Se recomienda usar tokens con permisos mínimos necesarios
+
+## Tecnologías
+
+- **Next.js 16** - Framework React
+- **TypeScript** - Type safety
+- **OpenAI GPT-4** - Generación de código
+- **simple-git** - Operaciones Git
+- **Heroicons** - Iconos
+- **Tailwind CSS 4** - Estilos
+
+## Troubleshooting
+
+### Error: "Failed to push"
+
+- Verifica que el `GITHUB_TOKEN` esté configurado correctamente
+- Confirma que el token tenga permisos de `repo`
+- Asegúrate de que el remote esté configurado
+
+### Error: "Failed to create branch"
+
+- Verifica que Git esté inicializado en el proyecto
+- Confirma que no haya cambios sin commitear en la rama actual
+
+### Error: "OpenAI API error"
+
+- Verifica que tu `OPENAI_API_KEY` sea válida
+- Confirma que tengas créditos disponibles en tu cuenta de OpenAI
+- Revisa que estés usando un modelo disponible (gpt-4)
+
+## Licencia
+
+MIT
