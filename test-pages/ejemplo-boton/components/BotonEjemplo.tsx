@@ -24,6 +24,7 @@ export default function BotonEjemplo() {
       <button
         onClick={manejarClick}
         className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+        style={{ backgroundColor: 'red' }}
       >
         Haz clic aquí ({contador})
       </button>
@@ -35,7 +36,7 @@ export default function BotonEjemplo() {
       )}
       
       <div className="mt-4 p-3 bg-gray-50 rounded text-sm">
-        <p className="font-medium">¿Cómo usar este componente?</p>
+        <p className="font-medium" style={{ color: 'red' }}>¿Cómo usar este componente?</p>
         <ol className="list-decimal pl-5 mt-2 space-y-1">
           <li>Haz clic en el botón para incrementar el contador</li>
           <li>Cada 5 clics verás un mensaje especial</li>
