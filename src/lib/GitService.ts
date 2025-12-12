@@ -265,10 +265,18 @@ export class GitService {
 
             onProgress?.('Clonando repositorio...');
 
-            // Clone repository
-            const git = simpleGit();
+            // Clone repository with progress handler
+            const git = simpleGit({
+                progress({ method, stage, progress }) {
+                    if (onProgress) {
+                        onProgress(`Clonando: ${stage} ${progress}%`);
+                    }
+                }
+            });
+
             await git.clone(authenticatedUrl, targetPath, {
                 '--depth': 1,  // Shallow clone for speed
+                '--progress': null, // Enable progress output
             });
 
             onProgress?.('Clonación completada');

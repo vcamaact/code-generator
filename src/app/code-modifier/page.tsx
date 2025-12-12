@@ -15,6 +15,7 @@ interface ApiResponse {
     modifications: ModificationResult[];
     commitHash?: string;
     pushed?: boolean;
+    merged?: boolean; // NEW: Auto-merge status
     isExternalRepo?: boolean;
     repoUrl?: string;
     analysis: {
@@ -40,6 +41,9 @@ export default function CodeModifierPage() {
     const [autoCleanup, setAutoCleanup] = useState(true);
     const [autoMerge, setAutoMerge] = useState(false); // NEW: Auto-merge option
 
+    // NEW: Progress state
+    const [progress, setProgress] = useState({ percent: 0, message: '', stage: 'idle' });
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!prompt.trim()) return;
@@ -51,6 +55,7 @@ export default function CodeModifierPage() {
         setIsLoading(true);
         setError('');
         setResult(null);
+        setProgress({ percent: 0, message: 'Iniciando...', stage: 'starting' });
 
         try {
             const response = await fetch('/api/code-modify', {
@@ -60,28 +65,73 @@ export default function CodeModifierPage() {
                 },
                 body: JSON.stringify({
                     prompt,
-                    commitTitle: commitTitle.trim() || undefined, // NEW: Send custom commit title
+                    commitTitle: commitTitle.trim() || undefined,
                     repoUrl: useExternalRepo ? repoUrl : undefined,
                     targetBranch: useExternalRepo ? targetBranch : undefined,
                     autoCommit,
                     autoPush,
                     autoCleanup: useExternalRepo ? autoCleanup : undefined,
-                    autoMerge: useExternalRepo ? autoMerge : undefined, // NEW: Send autoMerge option
+                    autoMerge: useExternalRepo ? autoMerge : undefined,
                 }),
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
-                throw new Error(data.error || 'Error al modificar el código');
+                // If streaming failed immediately or non-200
+                const data = await response.json().catch(() => ({}));
+                throw new Error(data.error || `Error ${response.status}: ${response.statusText}`);
             }
 
-            setResult(data);
+            if (!response.body) throw new Error('ReadableStream not supported');
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';
+
+                for (const line of lines) {
+                    if (!line.trim()) continue;
+                    try {
+                        const data = JSON.parse(line);
+
+                        switch (data.type) {
+                            case 'progress':
+                                setProgress({
+                                    percent: data.percent ?? 0,
+                                    message: data.message,
+                                    stage: data.stage
+                                });
+                                break;
+                            case 'log':
+                                console.log('[Server Log]', data.message);
+                                break;
+                            case 'complete':
+                                setResult(data);
+                                break;
+                            case 'error':
+                                throw new Error(data.error);
+                        }
+                    } catch (e: any) {
+                        console.error('Error parsing stream line:', e);
+                        if (e.message !== "Unexpected end of JSON input") {
+                            // Only throw if it's an explicit error from the stream or critical
+                        }
+                    }
+                }
+            }
+
         } catch (err: any) {
             setError(err.message || 'Error al procesar la solicitud');
             console.error(err);
         } finally {
             setIsLoading(false);
+            setProgress(prev => ({ ...prev, stage: 'idle' }));
         }
     };
 
@@ -294,6 +344,25 @@ export default function CodeModifierPage() {
                     </form>
                 </div>
 
+                {/* Progress Bar */}
+                {isLoading && (
+                    <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-8 border border-indigo-100 animate-in fade-in slide-in-from-top-4 duration-300">
+                        <div className="flex justify-between text-sm font-semibold text-gray-700 mb-2">
+                            <span>{progress.message || 'Iniciando...'}</span>
+                            <span>{progress.percent}%</span>
+                        </div>
+                        <div className="h-4 bg-gray-100 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500 ease-out"
+                                style={{ width: `${progress.percent}%` }}
+                            />
+                        </div>
+                        <div className="mt-2 text-xs text-gray-500 text-right font-mono">
+                            Stage: {progress.stage}
+                        </div>
+                    </div>
+                )}
+
                 {/* Error Display */}
                 {error && (
                     <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 mb-8 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -347,6 +416,15 @@ export default function CodeModifierPage() {
                                                 {result.pushed ? '✓ Pusheado' : '× No pusheado'}
                                             </p>
                                         </div>
+
+                                        {result.merged !== undefined && (
+                                            <div className="bg-white/60 rounded-lg p-3">
+                                                <p className="text-xs font-medium text-gray-500 mb-1">Auto-Merge</p>
+                                                <p className={`text-sm font-semibold ${result.merged ? 'text-green-600' : 'text-orange-600'}`}>
+                                                    {result.merged ? '✓ Fusionado' : '× No fusionado'}
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
