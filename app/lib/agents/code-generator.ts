@@ -1,14 +1,25 @@
 import { ChatOpenAI } from "@langchain/openai";
-import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import { ChatAnthropic } from "@langchain/anthropic";
+import { HumanMessage, SystemMessage, BaseMessage } from "@langchain/core/messages";
 
 export class CodeGeneratorAgent {
-  private model: ChatOpenAI;
+  private model: ChatOpenAI | ChatAnthropic;
 
   constructor() {
-    this.model = new ChatOpenAI({
-      modelName: process.env.OPENAI_MODEL || "gpt-4o",
-      temperature: 0,
-    });
+    const provider = process.env.AI_PROVIDER || 'openai';
+    
+    if (provider === 'anthropic') {
+      this.model = new ChatAnthropic({
+        modelName: "claude-3-5-sonnet-20240620",
+        temperature: 0,
+        apiKey: process.env.ANTHROPIC_API_KEY,
+      });
+    } else {
+      this.model = new ChatOpenAI({
+        modelName: process.env.OPENAI_MODEL || "gpt-4o",
+        temperature: 0,
+      });
+    }
   }
 
   async generateCode(prompt: string, currentCode: string): Promise<string> {
