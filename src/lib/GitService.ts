@@ -38,15 +38,13 @@ export class GitService {
      */
     async createBranch(description: string): Promise<CreateBranchResult> {
         try {
-            // Generate branch name: codex-<timestamp>-<sanitized-description>
-            const timestamp = Date.now();
-            const sanitizedDesc = description
+            // Generate branch name from description (sanitized)
+            // User requested "solo el title", no "codex-" prefix or timestamp
+            const branchName = description
                 .toLowerCase()
-                .replace(/[^a-z0-9]+/g, '-')
-                .substring(0, 50)
-                .replace(/^-|-$/g, '');
-
-            const branchName = `codex-${timestamp}-${sanitizedDesc}`;
+                .replace(/[^a-z0-9-\/]+/g, '-') // Allow alphanumeric, dashes and forward slashes
+                .replace(/-+/g, '-')            // Collapse multiple dashes
+                .replace(/^-|-$/g, '');         // Trim dashes
 
             // Check if branch already exists
             const branches = await this.git.branchLocal();
@@ -137,37 +135,56 @@ export class GitService {
      */
     async push(branchName: string, force: boolean = false): Promise<boolean> {
         try {
+            console.log('[GitService] Starting push for branch:', branchName);
+
             // Configure remote URL with token if provided
             if (this.githubToken) {
+                console.log('[GitService] Token available, configuring remote...');
                 const remotes = await this.git.getRemotes(true);
+                console.log('[GitService] Current remotes:', JSON.stringify(remotes, null, 2));
+
                 if (remotes.length > 0) {
                     const remote = remotes[0];
-                    const remoteUrl = remote.refs.push;
+                    const remoteUrl = remote.refs.push || remote.refs.fetch;
+                    console.log('[GitService] Original remote URL:', remoteUrl);
 
                     if (remoteUrl && remoteUrl.includes('github.com')) {
                         // For HTTPS URLs, inject the token
-                        const authenticatedUrl = remoteUrl.replace(
+                        let authenticatedUrl = remoteUrl;
+
+                        // Remove existing token if present
+                        authenticatedUrl = authenticatedUrl.replace(/https:\/\/[^@]+@github\.com\//, 'https://github.com/');
+
+                        // Inject new token
+                        authenticatedUrl = authenticatedUrl.replace(
                             'https://github.com/',
                             `https://${this.githubToken}@github.com/`
                         );
 
-                        await this.git.addRemote('origin-auth', authenticatedUrl).catch(() => {
-                            // Remote might already exist, update it
-                        });
+                        console.log('[GitService] Setting authenticated URL (token hidden)');
+                        // Update the origin remote with authenticated URL
+                        await this.git.remote(['set-url', 'origin', authenticatedUrl]);
+
+                        // Verify the change
+                        const updatedRemotes = await this.git.getRemotes(true);
+                        console.log('[GitService] Updated remote URL contains token:', updatedRemotes[0]?.refs?.push?.includes('@github.com'));
                     }
                 }
             }
 
             // Push to remote
+            console.log('[GitService] Pushing to origin...');
             const pushOptions: string[] = ['--set-upstream', 'origin', branchName];
             if (force) {
                 pushOptions.push('--force');
             }
 
             await this.git.push(pushOptions);
+            console.log('[GitService] Push successful!');
 
             return true;
         } catch (error) {
+            console.error('[GitService] Push failed:', error);
             throw new Error(`Failed to push: ${error}`);
         }
     }
@@ -221,5 +238,99 @@ export class GitService {
         } catch (error) {
             throw new Error(`Failed to configure remote: ${error}`);
         }
+    }
+
+    /**
+     * Clones a repository to a specified path with authentication
+     */
+    async cloneRepository(
+        repoUrl: string,
+        targetPath: string,
+        onProgress?: (message: string) => void
+    ): Promise<string> {
+        try {
+            onProgress?.('Preparando clonación...');
+
+            // Ensure target directory exists
+            await fs.mkdir(targetPath, { recursive: true });
+
+            // Inject GitHub token into URL for authentication
+            let authenticatedUrl = repoUrl;
+            if (this.githubToken && repoUrl.includes('github.com')) {
+                authenticatedUrl = repoUrl.replace(
+                    'https://github.com/',
+                    `https://${this.githubToken}@github.com/`
+                );
+            }
+
+            onProgress?.('Clonando repositorio...');
+
+            // Clone repository
+            const git = simpleGit();
+            await git.clone(authenticatedUrl, targetPath, {
+                '--depth': 1,  // Shallow clone for speed
+            });
+
+            onProgress?.('Clonación completada');
+
+            return targetPath;
+        } catch (error) {
+            throw new Error(`Failed to clone repository: ${error}`);
+        }
+    }
+
+    /**
+     * Checks out a specific branch after cloning
+     */
+    async checkoutBranch(branchName: string): Promise<void> {
+        try {
+            await this.git.checkout(branchName);
+        } catch (error) {
+            throw new Error(`Failed to checkout branch ${branchName}: ${error}`);
+        }
+    }
+
+    /**
+     * Merges a branch into the current branch
+     */
+    async merge(branchName: string): Promise<void> {
+        try {
+            console.log(`[GitService] Merging ${branchName} into current branch`);
+            await this.git.merge([branchName]);
+        } catch (error) {
+            console.error(`[GitService] Merge failed: ${error}`);
+            throw new Error(`Failed to merge branch ${branchName}: ${error}`);
+        }
+    }
+
+    /**
+     * Removes a cloned repository directory
+     */
+    async cleanupRepository(repoPath: string): Promise<void> {
+        try {
+            // Ensure we're not deleting the current project
+            if (repoPath === this.projectPath) {
+                throw new Error('Cannot cleanup current project path');
+            }
+
+            // Delete directory recursively
+            await fs.rm(repoPath, { recursive: true, force: true });
+        } catch (error) {
+            throw new Error(`Failed to cleanup repository: ${error}`);
+        }
+    }
+
+    /**
+     * Gets repository info from URL
+     */
+    static parseRepoUrl(repoUrl: string): { owner: string; repo: string } | null {
+        const match = repoUrl.match(/github\.com[/:]([^/]+)\/([^/.]+)/);
+        if (match) {
+            return {
+                owner: match[1],
+                repo: match[2].replace(/\.git$/, ''),
+            };
+        }
+        return null;
     }
 }
