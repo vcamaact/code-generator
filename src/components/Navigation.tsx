@@ -15,7 +15,7 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="bg-white shadow-sm mb-8">
+    <nav className="bg-red-500 shadow-sm mb-8">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between h-16">
           <div className="flex space-x-8">
@@ -24,8 +24,8 @@ export default function Navigation() {
                 key={item.path}
                 href={item.path}
                 className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${pathname === item.path
-                    ? 'border-indigo-500 text-gray-900'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    ? 'border-indigo-500 text-white'
+                    : 'border-transparent text-white hover:border-gray-300 hover:text-gray-200'
                   }`}
               >
                 {item.name}
