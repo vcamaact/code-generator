@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 
 export default function Navbar() {
@@ -16,19 +15,19 @@ export default function Navbar() {
           <div className="hidden sm:ml-6 sm:flex sm:items-center space-x-4">
             <a
               href="#"
-              className="px-3 py-2 rounded-md text-sm font-medium text-red-500 hover:text-yellow-200 bg-red-200 hover:bg-red-300"
+              className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white bg-green-500 hover:bg-green-700"
             >
               Inicio
             </a>
             <a
               href="#features"
-              className="px-3 py-2 rounded-md text-sm font-medium text-red-500 hover:text-yellow-200 bg-red-200 hover:bg-red-300"
+              className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white bg-green-500 hover:bg-green-700"
             >
               Características
             </a>
             <a
               href="#how-it-works"
-              className="px-3 py-2 rounded-md text-sm font-medium text-red-500 hover:text-yellow-200 bg-red-200 hover:bg-red-300"
+              className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white bg-green-500 hover:bg-green-700"
             >
               Cómo funciona
             </a>

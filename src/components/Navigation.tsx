@@ -24,8 +24,8 @@ export default function Navigation() {
                 key={item.path}
                 href={item.path}
                 className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${pathname === item.path
-                    ? 'border-indigo-500 text-red-500'
-                    : 'border-transparent text-white hover:border-gray-300 hover:text-red-500'
+                    ? 'border-indigo-500 text-green-500'
+                    : 'border-transparent text-white hover:border-gray-300 hover:text-green-500'
                   }`}
               >
                 {item.name}
